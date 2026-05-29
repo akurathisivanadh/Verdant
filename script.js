@@ -103,6 +103,26 @@ const snpTitle       = document.getElementById("snpTitle");
 const snpArtist      = document.getElementById("snpArtist");
 const sidebarNowPlaying = document.getElementById("sidebarNowPlaying");
 
+// Fullscreen now playing view
+const nowPlayingView = document.getElementById("nowPlayingView");
+const npBackBtn      = document.getElementById("npBackBtn");
+const npFullCover    = document.getElementById("npFullCover");
+const npFullTitle    = document.getElementById("npFullTitle");
+const npFullArtist   = document.getElementById("npFullArtist");
+const npHeartBtn     = document.getElementById("npHeartBtn");
+const npProgressWrap = document.getElementById("npProgressWrap");
+const npProgressFill = document.getElementById("npProgressFill");
+const npProgressThumb= document.getElementById("npProgressThumb");
+const npCurrentTime  = document.getElementById("npCurrentTime");
+const npTotalTime    = document.getElementById("npTotalTime");
+const npPlayBtn      = document.getElementById("npPlayBtn");
+const npPlayIcon     = document.getElementById("npPlayIcon");
+const npPauseIcon    = document.getElementById("npPauseIcon");
+const npPrevBtn      = document.getElementById("npPrevBtn");
+const npNextBtn      = document.getElementById("npNextBtn");
+const npShuffleBtn   = document.getElementById("npShuffleBtn");
+const npRepeatBtn    = document.getElementById("npRepeatBtn");
+
 // ─── INIT ────────────────────────────────────────────────────
 function init() {
   audio.volume = 0.8;
@@ -204,7 +224,7 @@ function renderGrid(container, songArr) {
     const heartEl = document.createElement("button");
     heartEl.className = `card-heart${isFav ? " favorited" : ""}`;
     heartEl.setAttribute("aria-label", "Favorite");
-    heartEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+    heartEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="r[...]`;
     heartEl.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(realIndex); });
     artWrap.appendChild(heartEl);
 
@@ -291,7 +311,7 @@ function renderList() {
       <div class="sli-artist">${song.artist}</div>
       <div class="sli-duration" id="dur-${realIndex}">—</div>
       <button class="sli-heart${isFav ? " favorited" : ""}" aria-label="Favorite">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:${isFav ? '#ff4d6d' : ''}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="colo[...]
       </button>
     `;
 
@@ -373,12 +393,14 @@ function updatePlayerUI(song) {
   playerArtist.textContent = song.artist;
   npTitle.textContent      = song.title;
   npArtist.textContent     = song.artist;
+  npFullTitle.textContent  = song.title;
+  npFullArtist.textContent = song.artist;
   snpTitle.textContent     = song.title;
   snpArtist.textContent    = song.artist;
 
   // Cover
   const src = song.cover || "";
-  [playerCover, npCover, snpCover].forEach(img => {
+  [playerCover, npCover, npFullCover, snpCover].forEach(img => {
     img.src = src;
     const idx = currentIndex;
     img.addEventListener("error", () => {
@@ -397,6 +419,9 @@ function updatePlayerUI(song) {
   const isFav = favorites.includes(currentIndex);
   heartBtn.classList.toggle("favorited", isFav);
   heartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+  
+  npHeartBtn.classList.toggle("favorited", isFav);
+  npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
 
   // Document title
   document.title = `${song.title} — ${song.artist} | Verdant`;
@@ -405,6 +430,8 @@ function updatePlayerUI(song) {
 function updatePlayState() {
   playIcon.style.display  = isPlaying ? "none" : "";
   pauseIcon.style.display = isPlaying ? "" : "none";
+  npPlayIcon.style.display = isPlaying ? "none" : "";
+  npPauseIcon.style.display = isPlaying ? "" : "none";
   if (isPlaying) {
     playerCover.classList.add("spinning");
   } else {
@@ -462,6 +489,8 @@ function toggleFavorite(index) {
     const isFav = favorites.includes(index);
     heartBtn.classList.toggle("favorited", isFav);
     heartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+    npHeartBtn.classList.toggle("favorited", isFav);
+    npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
   }
 
   refreshAllGrids();
@@ -496,11 +525,15 @@ audio.addEventListener("timeupdate", () => {
   const pct = (audio.currentTime / audio.duration) * 100;
   progressFill.style.width  = pct + "%";
   progressThumb.style.left  = pct + "%";
+  npProgressFill.style.width = pct + "%";
+  npProgressThumb.style.left = pct + "%";
   currentTimeEl.textContent = formatTime(audio.currentTime);
+  npCurrentTime.textContent = formatTime(audio.currentTime);
 });
 
 audio.addEventListener("loadedmetadata", () => {
   totalTimeEl.textContent = formatTime(audio.duration);
+  npTotalTime.textContent = formatTime(audio.duration);
 });
 
 audio.addEventListener("ended", () => {
@@ -513,20 +546,27 @@ audio.addEventListener("ended", () => {
   }
 });
 
-function seekTo(e) {
-  const rect = progressWrap.getBoundingClientRect();
+function seekTo(e, isNP = false) {
+  const wrap = isNP ? npProgressWrap : progressWrap;
+  const fill = isNP ? npProgressFill : progressFill;
+  const thumb = isNP ? npProgressThumb : progressThumb;
+  const rect = wrap.getBoundingClientRect();
   const x    = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
   const pct  = x / rect.width;
   if (audio.duration) {
     audio.currentTime = pct * audio.duration;
-    progressFill.style.width = (pct * 100) + "%";
-    progressThumb.style.left = (pct * 100) + "%";
+    fill.style.width = (pct * 100) + "%";
+    thumb.style.left = (pct * 100) + "%";
   }
 }
 
 progressWrap.addEventListener("mousedown", (e) => {
   isDraggingProgress = true;
   seekTo(e);
+});
+npProgressWrap.addEventListener("mousedown", (e) => {
+  isDraggingProgress = true;
+  seekTo(e, true);
 });
 document.addEventListener("mousemove", (e) => {
   if (isDraggingProgress) seekTo(e);
@@ -537,6 +577,10 @@ document.addEventListener("mouseup", () => { isDraggingProgress = false; });
 progressWrap.addEventListener("touchstart", (e) => {
   isDraggingProgress = true;
   seekTo(e.touches[0]);
+}, { passive: true });
+npProgressWrap.addEventListener("touchstart", (e) => {
+  isDraggingProgress = true;
+  seekTo(e.touches[0], true);
 }, { passive: true });
 document.addEventListener("touchmove", (e) => {
   if (isDraggingProgress) seekTo(e.touches[0]);
@@ -590,12 +634,14 @@ muteBtn.addEventListener("click", () => {
 shuffleBtn.addEventListener("click", () => {
   isShuffle = !isShuffle;
   shuffleBtn.classList.toggle("active", isShuffle);
+  npShuffleBtn.classList.toggle("active", isShuffle);
   showToast(isShuffle ? "Shuffle on" : "Shuffle off");
 });
 
 repeatBtn.addEventListener("click", () => {
   isRepeat = !isRepeat;
   repeatBtn.classList.toggle("active", isRepeat);
+  npRepeatBtn.classList.toggle("active", isRepeat);
   showToast(isRepeat ? "Repeat on" : "Repeat off");
 });
 
@@ -604,12 +650,29 @@ playBtn.addEventListener("click", togglePlay);
 prevBtn.addEventListener("click", prevSong);
 nextBtn.addEventListener("click", nextSong);
 
+npPlayBtn.addEventListener("click", togglePlay);
+npPrevBtn.addEventListener("click", prevSong);
+npNextBtn.addEventListener("click", nextSong);
+
 heartBtn.addEventListener("click", () => {
   if (currentIndex === -1) return;
   toggleFavorite(currentIndex);
 });
 
-// ─── NOW PLAYING MODAL ───────────────────────────────────────
+npHeartBtn.addEventListener("click", () => {
+  if (currentIndex === -1) return;
+  toggleFavorite(currentIndex);
+});
+
+// ─── NOW PLAYING VIEW ────────────────────────────────────────
+playerCover.addEventListener("click", () => nowPlayingView.classList.add("open"));
+playerTitle.addEventListener("click", () => nowPlayingView.classList.add("open"));
+npBackBtn.addEventListener("click", () => nowPlayingView.classList.remove("open"));
+nowPlayingView.addEventListener("click", (e) => {
+  if (e.target === nowPlayingView) nowPlayingView.classList.remove("open");
+});
+
+// ─── NOW PLAYING MODAL (old) ───────────────────────────────────────
 playerCover.addEventListener("click", () => npOverlay.classList.add("open"));
 playerTitle.addEventListener("click", () => npOverlay.classList.add("open"));
 
@@ -686,7 +749,7 @@ document.addEventListener("keydown", (e) => {
     case "ArrowDown":  audio.volume = Math.max(0, audio.volume - 0.1); updateVolumeUI(audio.volume); break;
     case "KeyN":       nextSong(); break;
     case "KeyP":       prevSong(); break;
-    case "Escape":     npOverlay.classList.remove("open"); break;
+    case "Escape":     npOverlay.classList.remove("open"); nowPlayingView.classList.remove("open"); break;
   }
 });
 
@@ -694,7 +757,7 @@ document.addEventListener("keydown", (e) => {
 function bindEvents() {
   // Sidebar now playing card opens modal
   document.querySelector(".snp-card").addEventListener("click", () => {
-    if (currentIndex !== -1) npOverlay.classList.add("open");
+    if (currentIndex !== -1) nowPlayingView.classList.add("open");
   });
 }
 
