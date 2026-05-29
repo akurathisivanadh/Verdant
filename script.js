@@ -1,5 +1,3 @@
-
-
 const songs = [
   {
     title: "Nuvu Naku Nenu Neku",
@@ -25,12 +23,9 @@ const songs = [
     cover: "images/heavy.png",
     src: "songs/The_Heavy_Light.mp3",
   },
-  
-    
 ];
 
 // ─── GRADIENT FALLBACK COVERS ────────────────────────────────
-// Beautiful gradient covers shown when image files are missing
 const gradients = [
   "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,#533483)",
   "linear-gradient(135deg,#0f2027,#203a43,#2c5364)",
@@ -89,12 +84,6 @@ const recentEmpty    = document.getElementById("recentEmpty");
 const featuredRow    = document.getElementById("featuredRow");
 const searchInput    = document.getElementById("searchInput");
 const songCountEl    = document.getElementById("songCount");
-const npOverlay      = document.getElementById("npOverlay");
-const npModal        = document.getElementById("npModal");
-const npClose        = document.getElementById("npClose");
-const npCover        = document.getElementById("npCover");
-const npTitle        = document.getElementById("npTitle");
-const npArtist       = document.getElementById("npArtist");
 const sidebar        = document.getElementById("sidebar");
 const mainContent    = document.getElementById("mainContent");
 const menuToggle     = document.getElementById("menuToggle");
@@ -103,25 +92,26 @@ const snpTitle       = document.getElementById("snpTitle");
 const snpArtist      = document.getElementById("snpArtist");
 const sidebarNowPlaying = document.getElementById("sidebarNowPlaying");
 
-// Fullscreen now playing view
-const nowPlayingView = document.getElementById("nowPlayingView");
-const npBackBtn      = document.getElementById("npBackBtn");
-const npFullCover    = document.getElementById("npFullCover");
-const npFullTitle    = document.getElementById("npFullTitle");
-const npFullArtist   = document.getElementById("npFullArtist");
-const npHeartBtn     = document.getElementById("npHeartBtn");
+// New Fullscreen Modal Refs
+const npOverlay      = document.getElementById("npOverlay");
+const npModal        = document.getElementById("npModal");
+const npClose        = document.getElementById("npClose");
+const npCover        = document.getElementById("npCover");
+const npTitle        = document.getElementById("npTitle");
+const npArtist       = document.getElementById("npArtist");
 const npProgressWrap = document.getElementById("npProgressWrap");
 const npProgressFill = document.getElementById("npProgressFill");
-const npProgressThumb= document.getElementById("npProgressThumb");
+const npProgressThumb = document.getElementById("npProgressThumb");
 const npCurrentTime  = document.getElementById("npCurrentTime");
 const npTotalTime    = document.getElementById("npTotalTime");
+const npShuffleBtn   = document.getElementById("npShuffleBtn");
+const npPrevBtn      = document.getElementById("npPrevBtn");
 const npPlayBtn      = document.getElementById("npPlayBtn");
+const npNextBtn      = document.getElementById("npNextBtn");
+const npRepeatBtn    = document.getElementById("npRepeatBtn");
 const npPlayIcon     = document.getElementById("npPlayIcon");
 const npPauseIcon    = document.getElementById("npPauseIcon");
-const npPrevBtn      = document.getElementById("npPrevBtn");
-const npNextBtn      = document.getElementById("npNextBtn");
-const npShuffleBtn   = document.getElementById("npShuffleBtn");
-const npRepeatBtn    = document.getElementById("npRepeatBtn");
+const npHeartBtn     = document.getElementById("npHeartBtn");
 
 // ─── INIT ────────────────────────────────────────────────────
 function init() {
@@ -147,7 +137,6 @@ function createCoverImg(song, index, className = "") {
   img.alt = song.title;
   if (className) img.className = className;
 
-  // Fallback to gradient if image fails to load
   img.addEventListener("error", () => {
     img.style.display = "none";
     const parent = img.parentElement;
@@ -224,7 +213,7 @@ function renderGrid(container, songArr) {
     const heartEl = document.createElement("button");
     heartEl.className = `card-heart${isFav ? " favorited" : ""}`;
     heartEl.setAttribute("aria-label", "Favorite");
-    heartEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="r[...]`;
+    heartEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
     heartEl.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(realIndex); });
     artWrap.appendChild(heartEl);
 
@@ -311,7 +300,7 @@ function renderList() {
       <div class="sli-artist">${song.artist}</div>
       <div class="sli-duration" id="dur-${realIndex}">—</div>
       <button class="sli-heart${isFav ? " favorited" : ""}" aria-label="Favorite">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="colo[...]
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:${isFav ? '#ff4d6d' : ''}"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     `;
 
@@ -326,8 +315,6 @@ function renderList() {
     });
 
     songList.appendChild(item);
-
-    // Load duration
     loadDuration(song.src, realIndex);
   });
 }
@@ -377,7 +364,6 @@ function playSong(index) {
   audio.src = song.src;
   audio.load();
   audio.play().catch(() => {
-    // Gracefully handle missing audio files
     showToast(`🎵 "${song.title}" — add your MP3 to /songs/ to hear it!`);
   });
 
@@ -386,6 +372,11 @@ function playSong(index) {
   updatePlayState();
   addToRecent(index);
   refreshAllGrids();
+
+  // Auto-open modal on mobile
+  if (window.innerWidth <= 900) {
+    npOverlay.classList.add("open");
+  }
 }
 
 function updatePlayerUI(song) {
@@ -393,14 +384,12 @@ function updatePlayerUI(song) {
   playerArtist.textContent = song.artist;
   npTitle.textContent      = song.title;
   npArtist.textContent     = song.artist;
-  npFullTitle.textContent  = song.title;
-  npFullArtist.textContent = song.artist;
   snpTitle.textContent     = song.title;
   snpArtist.textContent    = song.artist;
 
-  // Cover
   const src = song.cover || "";
-  [playerCover, npCover, npFullCover, snpCover].forEach(img => {
+  [playerCover, npCover, snpCover].forEach(img => {
+    if(!img) return;
     img.src = src;
     const idx = currentIndex;
     img.addEventListener("error", () => {
@@ -409,29 +398,29 @@ function updatePlayerUI(song) {
     }, { once: true });
   });
 
-  // Spinning cover
   playerCover.classList.add("spinning");
-
-  // Sidebar now playing
   sidebarNowPlaying.style.display = "block";
 
-  // Update heart state
+  // Sync Hearts
   const isFav = favorites.includes(currentIndex);
   heartBtn.classList.toggle("favorited", isFav);
   heartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
-  
-  npHeartBtn.classList.toggle("favorited", isFav);
-  npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+  if(npHeartBtn) {
+    npHeartBtn.classList.toggle("favorited", isFav);
+    npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+  }
 
-  // Document title
   document.title = `${song.title} — ${song.artist} | Verdant`;
 }
 
 function updatePlayState() {
   playIcon.style.display  = isPlaying ? "none" : "";
   pauseIcon.style.display = isPlaying ? "" : "none";
-  npPlayIcon.style.display = isPlaying ? "none" : "";
-  npPauseIcon.style.display = isPlaying ? "" : "none";
+  if(npPlayIcon && npPauseIcon) {
+    npPlayIcon.style.display  = isPlaying ? "none" : "";
+    npPauseIcon.style.display = isPlaying ? "" : "none";
+  }
+
   if (isPlaying) {
     playerCover.classList.add("spinning");
   } else {
@@ -484,13 +473,14 @@ function toggleFavorite(index) {
   }
   localStorage.setItem("vd_favorites", JSON.stringify(favorites));
 
-  // Update heart button in player
   if (index === currentIndex) {
     const isFav = favorites.includes(index);
     heartBtn.classList.toggle("favorited", isFav);
     heartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
-    npHeartBtn.classList.toggle("favorited", isFav);
-    npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+    if(npHeartBtn) {
+      npHeartBtn.classList.toggle("favorited", isFav);
+      npHeartBtn.querySelector("svg").setAttribute("fill", isFav ? "currentColor" : "none");
+    }
   }
 
   refreshAllGrids();
@@ -504,7 +494,6 @@ function addToRecent(index) {
   localStorage.setItem("vd_recent", JSON.stringify(recentlyPlayed));
 }
 
-// ─── REFRESH GRIDS ───────────────────────────────────────────
 function refreshAllGrids() {
   const filtered = searchQuery
     ? songs.filter(s =>
@@ -523,17 +512,21 @@ function refreshAllGrids() {
 audio.addEventListener("timeupdate", () => {
   if (isDraggingProgress || !audio.duration) return;
   const pct = (audio.currentTime / audio.duration) * 100;
+  
   progressFill.style.width  = pct + "%";
   progressThumb.style.left  = pct + "%";
-  npProgressFill.style.width = pct + "%";
-  npProgressThumb.style.left = pct + "%";
   currentTimeEl.textContent = formatTime(audio.currentTime);
-  npCurrentTime.textContent = formatTime(audio.currentTime);
+
+  if(npProgressFill) {
+    npProgressFill.style.width  = pct + "%";
+    npProgressThumb.style.left  = pct + "%";
+    npCurrentTime.textContent = formatTime(audio.currentTime);
+  }
 });
 
 audio.addEventListener("loadedmetadata", () => {
   totalTimeEl.textContent = formatTime(audio.duration);
-  npTotalTime.textContent = formatTime(audio.duration);
+  if(npTotalTime) npTotalTime.textContent = formatTime(audio.duration);
 });
 
 audio.addEventListener("ended", () => {
@@ -546,45 +539,35 @@ audio.addEventListener("ended", () => {
   }
 });
 
-function seekTo(e, isNP = false) {
-  const wrap = isNP ? npProgressWrap : progressWrap;
-  const fill = isNP ? npProgressFill : progressFill;
-  const thumb = isNP ? npProgressThumb : progressThumb;
-  const rect = wrap.getBoundingClientRect();
+function seekTo(e, wrapEl) {
+  const rect = wrapEl.getBoundingClientRect();
   const x    = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
   const pct  = x / rect.width;
   if (audio.duration) {
     audio.currentTime = pct * audio.duration;
-    fill.style.width = (pct * 100) + "%";
-    thumb.style.left = (pct * 100) + "%";
+    const pctStr = (pct * 100) + "%";
+    progressFill.style.width = pctStr;
+    progressThumb.style.left = pctStr;
+    if(npProgressFill) {
+      npProgressFill.style.width = pctStr;
+      npProgressThumb.style.left = pctStr;
+    }
   }
 }
 
-progressWrap.addEventListener("mousedown", (e) => {
-  isDraggingProgress = true;
-  seekTo(e);
-});
-npProgressWrap.addEventListener("mousedown", (e) => {
-  isDraggingProgress = true;
-  seekTo(e, true);
-});
-document.addEventListener("mousemove", (e) => {
-  if (isDraggingProgress) seekTo(e);
-});
-document.addEventListener("mouseup", () => { isDraggingProgress = false; });
+// Bottom Player Progress
+progressWrap.addEventListener("mousedown", (e) => { isDraggingProgress = true; seekTo(e, progressWrap); });
+progressWrap.addEventListener("touchstart", (e) => { isDraggingProgress = true; seekTo(e.touches[0], progressWrap); }, { passive: true });
 
-// Touch support for progress
-progressWrap.addEventListener("touchstart", (e) => {
-  isDraggingProgress = true;
-  seekTo(e.touches[0]);
-}, { passive: true });
-npProgressWrap.addEventListener("touchstart", (e) => {
-  isDraggingProgress = true;
-  seekTo(e.touches[0], true);
-}, { passive: true });
-document.addEventListener("touchmove", (e) => {
-  if (isDraggingProgress) seekTo(e.touches[0]);
-}, { passive: true });
+// Modal Progress
+if(npProgressWrap) {
+  npProgressWrap.addEventListener("mousedown", (e) => { isDraggingProgress = true; seekTo(e, npProgressWrap); });
+  npProgressWrap.addEventListener("touchstart", (e) => { isDraggingProgress = true; seekTo(e.touches[0], npProgressWrap); }, { passive: true });
+}
+
+document.addEventListener("mousemove", (e) => { if (isDraggingProgress) seekTo(e, npOverlay.classList.contains("open") ? npProgressWrap : progressWrap); });
+document.addEventListener("mouseup", () => { isDraggingProgress = false; });
+document.addEventListener("touchmove", (e) => { if (isDraggingProgress) seekTo(e.touches[0], npOverlay.classList.contains("open") ? npProgressWrap : progressWrap); }, { passive: true });
 document.addEventListener("touchend", () => { isDraggingProgress = false; });
 
 // ─── VOLUME ──────────────────────────────────────────────────
@@ -607,7 +590,6 @@ function updateVolumeUI(vol) {
 volumeWrap.addEventListener("mousedown", (e) => { isDraggingVolume = true; setVolume(e); });
 document.addEventListener("mousemove", (e) => { if (isDraggingVolume) setVolume(e); });
 document.addEventListener("mouseup", () => { isDraggingVolume = false; });
-
 volumeWrap.addEventListener("touchstart", (e) => { isDraggingVolume = true; setVolume(e.touches[0]); }, { passive: true });
 document.addEventListener("touchmove", (e) => { if (isDraggingVolume) setVolume(e.touches[0]); }, { passive: true });
 document.addEventListener("touchend", () => { isDraggingVolume = false; });
@@ -631,55 +613,41 @@ muteBtn.addEventListener("click", () => {
 });
 
 // ─── SHUFFLE / REPEAT ────────────────────────────────────────
-shuffleBtn.addEventListener("click", () => {
+function toggleShuffle() {
   isShuffle = !isShuffle;
   shuffleBtn.classList.toggle("active", isShuffle);
-  npShuffleBtn.classList.toggle("active", isShuffle);
+  if(npShuffleBtn) npShuffleBtn.classList.toggle("active", isShuffle);
   showToast(isShuffle ? "Shuffle on" : "Shuffle off");
-});
+}
 
-repeatBtn.addEventListener("click", () => {
+function toggleRepeat() {
   isRepeat = !isRepeat;
   repeatBtn.classList.toggle("active", isRepeat);
-  npRepeatBtn.classList.toggle("active", isRepeat);
+  if(npRepeatBtn) npRepeatBtn.classList.toggle("active", isRepeat);
   showToast(isRepeat ? "Repeat on" : "Repeat off");
-});
+}
+
+shuffleBtn.addEventListener("click", toggleShuffle);
+repeatBtn.addEventListener("click", toggleRepeat);
+if(npShuffleBtn) npShuffleBtn.addEventListener("click", toggleShuffle);
+if(npRepeatBtn) npRepeatBtn.addEventListener("click", toggleRepeat);
 
 // ─── PLAYER CONTROLS ─────────────────────────────────────────
 playBtn.addEventListener("click", togglePlay);
 prevBtn.addEventListener("click", prevSong);
 nextBtn.addEventListener("click", nextSong);
 
-npPlayBtn.addEventListener("click", togglePlay);
-npPrevBtn.addEventListener("click", prevSong);
-npNextBtn.addEventListener("click", nextSong);
+if(npPlayBtn) npPlayBtn.addEventListener("click", togglePlay);
+if(npPrevBtn) npPrevBtn.addEventListener("click", prevSong);
+if(npNextBtn) npNextBtn.addEventListener("click", nextSong);
 
-heartBtn.addEventListener("click", () => {
-  if (currentIndex === -1) return;
-  toggleFavorite(currentIndex);
-});
+heartBtn.addEventListener("click", () => { if (currentIndex !== -1) toggleFavorite(currentIndex); });
+if(npHeartBtn) npHeartBtn.addEventListener("click", () => { if (currentIndex !== -1) toggleFavorite(currentIndex); });
 
-npHeartBtn.addEventListener("click", () => {
-  if (currentIndex === -1) return;
-  toggleFavorite(currentIndex);
-});
-
-// ─── NOW PLAYING VIEW ────────────────────────────────────────
-playerCover.addEventListener("click", () => nowPlayingView.classList.add("open"));
-playerTitle.addEventListener("click", () => nowPlayingView.classList.add("open"));
-npBackBtn.addEventListener("click", () => nowPlayingView.classList.remove("open"));
-nowPlayingView.addEventListener("click", (e) => {
-  if (e.target === nowPlayingView) nowPlayingView.classList.remove("open");
-});
-
-// ─── NOW PLAYING MODAL (old) ───────────────────────────────────────
+// ─── NOW PLAYING MODAL ───────────────────────────────────────
 playerCover.addEventListener("click", () => npOverlay.classList.add("open"));
 playerTitle.addEventListener("click", () => npOverlay.classList.add("open"));
-
-npClose.addEventListener("click", () => npOverlay.classList.remove("open"));
-npOverlay.addEventListener("click", (e) => {
-  if (e.target === npOverlay) npOverlay.classList.remove("open");
-});
+if(npClose) npClose.addEventListener("click", () => npOverlay.classList.remove("open"));
 
 // ─── SIDEBAR TOGGLE ──────────────────────────────────────────
 let sidebarOpen = window.innerWidth > 900;
@@ -697,7 +665,6 @@ document.querySelectorAll(".nav-item").forEach(item => {
     e.preventDefault();
     const target = item.dataset.section;
     switchSection(target);
-    // Close sidebar on mobile
     if (window.innerWidth <= 900) {
       sidebarOpen = false;
       sidebar.classList.remove("open");
@@ -716,14 +683,12 @@ function switchSection(name) {
   document.querySelectorAll(".nav-item").forEach(i => {
     i.classList.toggle("active", i.dataset.section === name);
   });
-  // Scroll to top
   mainContent.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ─── SEARCH ──────────────────────────────────────────────────
 searchInput.addEventListener("input", () => {
   searchQuery = searchInput.value.trim().toLowerCase();
-
   if (searchQuery) {
     switchSection("home");
     document.querySelector(".section-title").innerHTML = `Results for "<span class="accent">${searchQuery}</span>"`;
@@ -732,15 +697,12 @@ searchInput.addEventListener("input", () => {
     document.querySelector(".section-title").innerHTML = `Good to see you <span class="accent">🎵</span>`;
     document.querySelector(".section-sub").textContent  = "Your personal music universe";
   }
-
   refreshAllGrids();
 });
 
 // ─── KEYBOARD SHORTCUTS ──────────────────────────────────────
 document.addEventListener("keydown", (e) => {
-  // Don't fire when typing in search
   if (document.activeElement === searchInput) return;
-
   switch (e.code) {
     case "Space":      e.preventDefault(); togglePlay(); break;
     case "ArrowRight": audio.currentTime = Math.min(audio.duration, audio.currentTime + 10); break;
@@ -749,15 +711,14 @@ document.addEventListener("keydown", (e) => {
     case "ArrowDown":  audio.volume = Math.max(0, audio.volume - 0.1); updateVolumeUI(audio.volume); break;
     case "KeyN":       nextSong(); break;
     case "KeyP":       prevSong(); break;
-    case "Escape":     npOverlay.classList.remove("open"); nowPlayingView.classList.remove("open"); break;
+    case "Escape":     npOverlay.classList.remove("open"); break;
   }
 });
 
-// ─── BIND EVENTS (for elements that need setup) ──────────────
+// ─── BIND EVENTS ─────────────────────────────────────────────
 function bindEvents() {
-  // Sidebar now playing card opens modal
   document.querySelector(".snp-card").addEventListener("click", () => {
-    if (currentIndex !== -1) nowPlayingView.classList.add("open");
+    if (currentIndex !== -1) npOverlay.classList.add("open");
   });
 }
 
